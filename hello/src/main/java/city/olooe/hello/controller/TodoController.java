@@ -1,8 +1,6 @@
 package city.olooe.hello.controller;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,7 +57,7 @@ public class TodoController {
             String temporaryUserId = "temporary-user";
 
             // (1) TodoEntity로 변환
-            TodoEntity entity = TodoDTO.todoEntity(dto);
+            TodoEntity entity = TodoDTO.toEntity(dto);
 
             // (2) id를 null로 초기화. 생성 당시 id가 없어야 하기 때문
             entity.setId(null);
@@ -90,7 +88,7 @@ public class TodoController {
         String temporaryUserId = "temporary-user";
 
         // (1) dto를 entity로 변환
-        TodoEntity entity = TodoDTO.todoEntity(dto);
+        TodoEntity entity = TodoDTO.toEntity(dto);
 
         // (2) 아이디를 temporaryUserId로 초기화. -> 나중에 인가에서 수정
         entity.setUserId(temporaryUserId);
@@ -111,7 +109,7 @@ public class TodoController {
             String temporaryUserId = "temporary-user";
 
             // (1) TodoEntity로 변환
-            TodoEntity entity = TodoDTO.todoEntity(dto);
+            TodoEntity entity = TodoDTO.toEntity(dto);
 
             // (2) 임시 유저 아이디 설정. -> 인증과 인가에서 나중에 다시 설정
             entity.setUserId(temporaryUserId);
