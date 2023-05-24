@@ -3,8 +3,10 @@ package city.olooe.hello.controller;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,6 +22,7 @@ import city.olooe.hello.service.TodoService;
 
 @RestController
 @RequestMapping("todo")
+@Slf4j
 public class TodoController {
 
     @Autowired
@@ -38,11 +41,10 @@ public class TodoController {
     // }
 
     @GetMapping
-    public ResponseEntity<?> retrieveTodo() {
-        String temporaryUserId = "temporary-user";
+    public ResponseEntity<?> retrieveTodo(@AuthenticationPrincipal String userId) {
 
         // (1) 서비스 메서드의 retrieve 메서드를 사용해 Todo 리스트를 가져온다
-        List<TodoEntity> entities = service.retrieve(temporaryUserId);
+        List<TodoEntity> entities = service.retrieve(userId);
 
         // (2) 자바 스트림을 이용해 리턴된 엔티티 리스트를 TodoDTO 리스트로 변환한다
         List<TodoDTO> dtos = entities.stream().map(TodoDTO::new).collect(Collectors.toList());
@@ -52,24 +54,22 @@ public class TodoController {
     }
 
     @PostMapping
-    public ResponseEntity<?> createTodo(@RequestBody TodoDTO dto) {
+    public ResponseEntity<?> createTodo(@AuthenticationPrincipal String userId, @RequestBody TodoDTO dto) {
         try {
-            String temporaryUserId = "temporary-user";
-
             // (1) TodoEntity로 변환
-            TodoEntity entity = TodoDTO.toEntity(dto);
+            TodoEntity todoEntity = TodoDTO.toEntity(dto);
 
             // (2) id를 null로 초기화. 생성 당시 id가 없어야 하기 때문
-            entity.setId(null);
+            todoEntity.setId(null);
 
-            // (3) 임시 유저 아이디 설정. -> 인증과 인가에서 나중에 다시 설정
-            entity.setUserId(temporaryUserId);
+            // (3) Authentication Bearer Token을 통해 받은 userId를 넘긴다
+            todoEntity.setUserId(userId);
 
             // (4) 서비스를 이용해 Todo 엔티티 생성
-            List<TodoEntity> entities = service.create(entity);
+            List<TodoEntity> entities = service.create(todoEntity);
 
             // (5) 자바 스트림을 이용해 리턴된 엔티티 리스트를 TodoDTO리스트로 변환
-            List<TodoDTO> dtos = entities.stream().map(e -> new TodoDTO(e)).collect(Collectors.toList());
+            List<TodoDTO> dtos = entities.stream().map(TodoDTO::new).collect(Collectors.toList());
 
             // (6) 변환된 TodoDTO 리스트를 이용해 ResponseDTO를 초기화 -> ResponseDTO 반환
             return ResponseEntity.ok().body(ResponseDTO.<TodoDTO>builder().data(dtos).build());
@@ -84,41 +84,38 @@ public class TodoController {
     }
 
     @PutMapping
-    public ResponseEntity<?> updateTodo(@RequestBody TodoDTO dto) {
-        String temporaryUserId = "temporary-user";
+    public ResponseEntity<?> updateTodo(@AuthenticationPrincipal String userId, @RequestBody TodoDTO dto) {
 
         // (1) dto를 entity로 변환
         TodoEntity entity = TodoDTO.toEntity(dto);
 
-        // (2) 아이디를 temporaryUserId로 초기화. -> 나중에 인가에서 수정
-        entity.setUserId(temporaryUserId);
+        // (2) Authentication Bearer Token을 통해 받은 userId를 넘긴다
+        entity.setUserId(userId);
 
         // (3) 서비스를 이용해 Todo 엔티티 업데이트
         List<TodoEntity> entities = service.update(entity);
 
         // (4) 자바 스트림을 이용해 리턴된 엔티티 리스트를 TodoDTO리스트로 변환
-        List<TodoDTO> dtos = entities.stream().map(e -> new TodoDTO(e)).collect(Collectors.toList());
+        List<TodoDTO> dtos = entities.stream().map(TodoDTO::new).collect(Collectors.toList());
 
         // (5) 변환된 TodoDTO 리스트를 이용해 ResponseDTO를 초기화 -> ResponseDTO 반환
         return ResponseEntity.ok().body(ResponseDTO.<TodoDTO>builder().data(dtos).build());
     }
 
     @DeleteMapping
-    public ResponseEntity<?> deleteTodo(@RequestBody TodoDTO dto) {
+    public ResponseEntity<?> deleteTodo(@AuthenticationPrincipal String userId, @RequestBody TodoDTO dto) {
         try {
-            String temporaryUserId = "temporary-user";
-
             // (1) TodoEntity로 변환
             TodoEntity entity = TodoDTO.toEntity(dto);
 
-            // (2) 임시 유저 아이디 설정. -> 인증과 인가에서 나중에 다시 설정
-            entity.setUserId(temporaryUserId);
+            // (2) Authentication Bearer Token을 통해 받은 userId를 넘긴다
+            entity.setUserId(userId);
 
             // (3) 서비스를 이용해 엔티티 삭제
             List<TodoEntity> entities = service.delete(entity);
 
             // (4) 자바 스트림을 이용해 리턴된 엔티티 리스트를 TodoDTO리스트로 변환
-            List<TodoDTO> dtos = entities.stream().map(e -> new TodoDTO(e)).collect(Collectors.toList());
+            List<TodoDTO> dtos = entities.stream().map(TodoDTO::new).collect(Collectors.toList());
 
             // (5) 변환된 TodoDTO 리스트를 이용해 ResponseDTO를 초기화 -> ResponseDTO 반환
             return ResponseEntity.ok().body(ResponseDTO.<TodoDTO>builder().data(dtos).build());

@@ -8,6 +8,8 @@ import city.olooe.hello.service.UserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,11 +19,14 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("auth")
 public class UserController {
+
+    // Client ID 933ca5226344ef4de70f
     @Autowired
     private UserService userService;
-
     @Autowired
     private TokenProvider tokenProvider;
+
+    private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@RequestBody UserDTO userDTO) {
@@ -32,7 +37,7 @@ public class UserController {
             // 요청을 이용해 저장할 유저 만들기
             UserEntity userEntity = UserEntity.builder()
                     .username(userDTO.getUsername())
-                    .password(userDTO.getPassword())
+                    .password(passwordEncoder.encode(userDTO.getPassword()))
                     .build();
             // 서비스를 이용해 리포지터리에 유저 저장
             UserEntity registeredUser = userService.create(userEntity);
@@ -52,7 +57,7 @@ public class UserController {
 
     @PostMapping("/signin")
     public ResponseEntity<?> authenticate(@RequestBody UserDTO userDTO) {
-        UserEntity userEntity = userService.getByCredentials(userDTO.getUsername(), userDTO.getPassword());
+        UserEntity userEntity = userService.getByCredentials(userDTO.getUsername(), userDTO.getPassword(), passwordEncoder);
 
         if(userEntity != null){
             // 토큰 생성
