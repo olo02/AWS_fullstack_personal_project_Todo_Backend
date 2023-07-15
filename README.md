@@ -3,7 +3,7 @@
 <div align="center">
 <img width="500" alt="image" src="https://github.com/olo02/AWS_fullstack_personal_project_Todo_Backend/assets/121186383/d1797e43-d8f7-4257-8ff5-c62f74434bee">
 
-
+[![Hits](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Folo02%2FAWS_fullstack_personal_project_Todo_Backend&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=hits&edge_flat=false)](https://hits.seeyoufarm.com)
 
 [데모 사이트 바로가기](https://todo.olooe.city)
 
